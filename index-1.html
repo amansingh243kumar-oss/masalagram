@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#a51f25">
+<title>MASALAGRAM | Fresh Masala. Fast Delivery. Full Flavour.</title>
+<style>
+:root{--red:#a51f25;--yellow:#ffc83d;--cream:#fff8e9;--ink:#28221d}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--ink)}
+header{background:var(--red);color:white;padding:22px 16px;text-align:center}
+header h1{margin:0;font-size:30px;letter-spacing:2px}header p{margin:8px 0 0;color:#ffe8a6}
+main{max-width:980px;margin:auto;padding:18px}
+.notice{background:#fff0bd;border:1px solid #f0d77d;border-radius:12px;padding:12px;margin-bottom:16px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+input,select,textarea,button{font:inherit;padding:11px;border:1px solid #d8cdb9;border-radius:9px}
+input,select,textarea{background:white;min-width:0;flex:1}
+button{background:var(--red);color:white;border:0;font-weight:bold;cursor:pointer}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card,.panel{background:white;border:1px solid #eee1cc;border-radius:14px;padding:15px;box-shadow:0 3px 12px #4b2b1010}
+.spice{font-size:38px}.card h3{margin:8px 0}.price{font-weight:bold;color:var(--red);font-size:18px}
+.card button{width:100%;margin-top:10px}.panel{margin-top:18px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #eee}
+label{display:block;font-weight:bold;margin:10px 0 5px}
+textarea{width:100%;min-height:65px}.wide{width:100%;margin-top:12px}
+.small{font-size:13px;color:#665b50}
+footer{text-align:center;padding:25px;color:#766b5e}
+</style>
+</head>
+<body>
+<header><h1>MASALAGRAM</h1><p>Fresh Masala. Fast Delivery. Full Flavour.</p></header>
+<main>
+<div class="notice"><strong>Free delivery</strong> on all orders in our launch areas: Tajpur, Adharpur, Baghi and Fathehpur (Samastipur, Bihar).</div>
+<div class="controls">
+<input id="search" placeholder="Search spices..." oninput="render()">
+<select id="category" onchange="render()"><option value="All">All categories</option><option>Whole Spices</option><option>Powder Spices</option><option>Blends</option></select>
+</div>
+<h2>Shop spices</h2>
+<div class="products" id="products"></div>
+<section class="panel">
+<h2>Your cart</h2><div id="cart"><p class="small">Your cart is empty.</p></div>
+<div class="row"><strong>Total</strong><strong id="total">₹0</strong></div>
+<p class="small">Delivery fee: ₹0 (Free)</p>
+<h3>Delivery details</h3>
+<label for="customer">Your name</label><input id="customer" placeholder="Enter your name">
+<label for="mobile">Mobile number</label><input id="mobile" inputmode="numeric" placeholder="10-digit mobile number">
+<label for="area">Delivery area</label><select id="area"><option value="">Choose your area</option><option>Tajpur</option><option>Adharpur</option><option>Baghi</option><option>Fathehpur</option></select>
+<label for="address">Full address</label><textarea id="address" placeholder="House, street, landmark"></textarea>
+<button class="wide" onclick="makeOrder()">Prepare order message</button>
+<p class="small">Prototype only: this prepares a message for you to copy. It does not yet send orders to a store or save them online. Product names and prices below are sample placeholders.</p>
+</section>
+</main>
+<footer>MASALAGRAM • Samastipur, Bihar</footer>
+<script>
+const items=[
+{name:"Turmeric Powder",category:"Powder Spices",price:60,unit:"100 g",emoji:"🌼"},
+{name:"Red Chilli Powder",category:"Powder Spices",price:70,unit:"100 g",emoji:"🌶️"},
+{name:"Coriander Powder",category:"Powder Spices",price:45,unit:"100 g",emoji:"🌿"},
+{name:"Cumin Seeds",category:"Whole Spices",price:55,unit:"100 g",emoji:"🌾"},
+{name:"Black Pepper",category:"Whole Spices",price:95,unit:"50 g",emoji:"⚫"},
+{name:"Garam Masala",category:"Blends",price:80,unit:"100 g",emoji:"🥘"}
+];
+let cart={};
+function render(){
+ const q=document.getElementById('search').value.toLowerCase(),cat=document.getElementById('category').value;
+ document.getElementById('products').innerHTML=items.filter(x=>(cat==='All'||x.category===cat)&&x.name.toLowerCase().includes(q)).map(x=>`<article class="card"><div class="spice">${x.emoji}</div><h3>${x.name}</h3><div class="small">${x.category} • ${x.unit}</div><p class="price">₹${x.price}</p><button onclick="add('${x.name}')">Add to cart</button></article>`).join('');
+ showCart();
+}
+function add(name){cart[name]=(cart[name]||0)+1;showCart()}
+function change(name,delta){cart[name]=(cart[name]||0)+delta;if(cart[name]<=0)delete cart[name];showCart()}
+function showCart(){
+ let entries=Object.entries(cart),sum=0;
+ document.getElementById('cart').innerHTML=entries.length?entries.map(([name,n])=>{let item=items.find(x=>x.name===name);sum+=item.price*n;return `<div class="row"><span>${name} × ${n}</span><span><button onclick="change('${name}',-1)">−</button> <button onclick="change('${name}',1)">+</button></span></div>`}).join(''):'<p class="small">Your cart is empty.</p>';
+ document.getElementById('total').textContent='₹'+sum;
+}
+function makeOrder(){
+ let entries=Object.entries(cart);if(!entries.length){alert('Please add an item first.');return}
+ let name=document.getElementById('customer').value.trim(),mobile=document.getElementById('mobile').value.trim(),area=document.getElementById('area').value,address=document.getElementById('address').value.trim();
+ if(!name||!mobile||!area||!address){alert('Please complete your name, mobile, area and address.');return}
+ if(!/^[0-9]{10}$/.test(mobile)){alert('Please enter a valid 10-digit mobile number.');return}
+ let total=entries.reduce((s,[n,q])=>s+items.find(x=>x.name===n).price*q,0);
+ let msg=`MASALAGRAM ORDER\nName: ${name}\nMobile: ${mobile}\nArea: ${area}\nAddress: ${address}\nItems:\n${entries.map(([n,q])=>`${n} x ${q}`).join('\n')}\nTotal: ₹${total}\nDelivery: FREE`;
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(()=>alert('Order summary copied. You can paste and send it to the store.')).catch(()=>prompt('Copy this order summary:',msg))}else{prompt('Copy this order summary:',msg)}
+}
+render();
+</script>
+</body>
+</html>
